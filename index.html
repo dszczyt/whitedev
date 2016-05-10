@@ -1,0 +1,65 @@
+<!doctype html>
+<html ng-app="mineSweeper">
+  <head>
+    <title>Démineur \o/</title>
+    <style type="text/css">
+      td {
+        height: 1em;
+        width: 1em;
+        border: 1px solid black;
+        background-color: gray;
+        text-align: center;
+        vertical-align: middle;
+        /*font-family: 'Courier New', Courier;*/
+      }
+      td.revealed {
+        background-color: #BBB;
+      }
+    </style>
+  </head>
+  <body ng-controller="GameController">
+    <form ng-submit="newGame()">
+      <label for="nbMines">Nombre de mines</label>
+      <input id="nbMines" type="number" ng-model="nbMines"/>
+      <button type="submit">Nouveau jeu</button>
+    </form>
+    <table>
+      <tbody>
+        <tr ng-repeat="row in board.cells track by $index">
+          <td
+            ng-repeat="cell in row track by $index"
+            ng-click="revealCell(cell)"
+            ng-class="{revealed: cell.revealed}">
+            <span ng-if="cell.revealed && cell.hasMine">*</span>
+            <span ng-if="cell.revealed && !cell.hasMine && cell.minesAround > 0">
+              {{ cell.minesAround }}
+            </span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <div ng-if="board.gameLost">Vous avez perdu</div>
+    <div ng-if="board.gameWon">Vous avez gagné</div>
+    <div>Votre score : {{ board.score }}</div>
+
+    <table>
+      <thead>
+        <th>Mines</th>
+        <th>Score</th>
+      </thead>
+      <tbody>
+        <tr ng-repeat="(nbMines, score) in board.scores track by $index">
+          <td>{{ nbMines }}</td>
+          <td>{{ score }}</td>
+        </tr>
+        <tr>
+          <td>Total</td>
+          <td>{{ board.total() }}</td>
+        </tr>
+      </tbody>
+    </table>
+    <script type="text/javascript" src="/node_modules/angular/angular.min.js"></script>
+    <script type="text/javascript" src="/node_modules/angular-local-storage/dist/angular-local-storage.js"></script>
+    <script type="text/javascript" src="/app.js"></script>
+  </body>
+</html>
