@@ -1,0 +1,16 @@
+<table>
+  <thead>
+    <th>Mines</th>
+    <th>Score</th>
+  </thead>
+  <tbody>
+    <tr ng-repeat="(nbMines, score) in scores track by $index">
+      <td>{{ nbMines }}</td>
+      <td>{{ score }}</td>
+    </tr>
+    <!-- <tr>
+      <td>Total</td>
+      <td>{{ board.total() }}</td>
+    </tr> -->
+  </tbody>
+</table>

@@ -129,4 +129,34 @@ app.controller("GameController", [
 
   }
 ]);
+
+app.directive(
+  "minesweeper",
+  function() {
+    return {
+      restrict: 'E',
+      templateUrl: "/templates/minesweeper.html",
+      controller: "GameController",
+      scope: {}
+    };
+  }
+);
+
+app.directive(
+  "minesweeperScores",
+  function() {
+    return {
+      restrict: 'E',
+      templateUrl: "/templates/minesweeperScores.html",
+      controller: [
+        "$scope",
+        "localStorageService",
+        function($scope, localStorageService) {
+          $scope.scores = localStorageService.get("scores") || {};
+        }
+      ]
+    };
+  }
+);
+
 })();

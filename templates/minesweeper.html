@@ -1,0 +1,23 @@
+<form ng-submit="newGame()">
+  <label for="nbMines">Nombre de mines</label>
+  <input id="nbMines" type="number" ng-model="nbMines"/>
+  <button type="submit">Nouveau jeu</button>
+</form>
+<table>
+  <tbody>
+    <tr ng-repeat="row in board.cells track by $index">
+      <td
+        ng-repeat="cell in row track by $index"
+        ng-click="revealCell(cell)"
+        ng-class="{revealed: cell.revealed}">
+        <span ng-if="cell.revealed && cell.hasMine">*</span>
+        <span ng-if="cell.revealed && !cell.hasMine && cell.minesAround > 0">
+          {{ cell.minesAround }}
+        </span>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<div ng-if="board.gameLost">Vous avez perdu</div>
+<div ng-if="board.gameWon">Vous avez gagné</div>
+<div>Votre score : {{ board.score }}</div>
