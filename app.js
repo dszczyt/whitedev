@@ -69,7 +69,7 @@ Board.prototype.initialize = function(nb) {
 
 Board.prototype.total = function() {
   var result = 0;
-  Object.keys(this.scores).forEach(function(nbMines) {
+  Object.keys(this.scores).forEach((nbMines) => {
     result += nbMines * this.scores[nbMines];
   });
   return result;
@@ -91,10 +91,13 @@ var app = angular.module("mineSweeper", [
 
 app.controller("GameController", [
   "$scope",
-  function($scope) {
-    var board = new Board(5, 5);
+  "localStorageService",
+  function($scope, localStorageService) {
+    var board = new Board(3, 3);
     board.initialize(1);
     $scope.board = board;
+
+    board.scores = localStorageService.get("scores") || {};
 
     $scope.revealCell = function(cell) {
       if (board.gameLost || board.gameWon) {
@@ -111,9 +114,12 @@ app.controller("GameController", [
       if (board.roundsLeft === 0) {
         board.gameWon = true;
         board.score += 1;
-        if (board.scores[board.nbMines] === undefined)
-          board.scores[board.nbMines] = 0;
-        board.scores[board.nbMines] += 1;
+        let key = board.nbMines;
+        if (board.scores[key] === undefined)
+          board.scores[key] = 0;
+        board.scores[key] += 1;
+
+        localStorageService.set("scores", board.scores);
       }
     };
 
