@@ -92,12 +92,17 @@ var app = angular.module("mineSweeper", [
 app.controller("GameController", [
   "$scope",
   "localStorageService",
-  function($scope, localStorageService) {
+  "$rootScope",
+  function($scope, localStorageService, $rootScope) {
     var board = new Board(3, 3);
     board.initialize(1);
     $scope.board = board;
 
-    board.scores = localStorageService.get("scores") || {};
+    function updateScores() {
+      board.scores = localStorageService.get("scores") || {};
+    }
+    updateScores();
+    $scope.$on("scoresUpdated", updateScores);
 
     $scope.revealCell = function(cell) {
       if (board.gameLost || board.gameWon) {
@@ -120,6 +125,7 @@ app.controller("GameController", [
         board.scores[key] += 1;
 
         localStorageService.set("scores", board.scores);
+        $rootScope.$broadcast("scoresUpdated");
       }
     };
 
@@ -148,11 +154,16 @@ app.directive(
     return {
       restrict: 'E',
       templateUrl: "/templates/minesweeperScores.html",
+      scope: {},
       controller: [
         "$scope",
         "localStorageService",
         function($scope, localStorageService) {
-          $scope.scores = localStorageService.get("scores") || {};
+          function updateScores() {
+            $scope.scores = localStorageService.get("scores") || {};
+          }
+          updateScores();
+          $scope.$on("scoresUpdated", updateScores);
         }
       ]
     };
