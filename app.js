@@ -85,85 +85,154 @@ Cell.prototype.initialize = function() {
   this.minesAround = 0;
 };
 
-var app = angular.module("mineSweeper", [
+angular.module("mineSweeper", [
   'LocalStorageModule'
 ]);
 
-app.controller("GameController", [
-  "$scope",
-  "localStorageService",
-  "$rootScope",
-  function($scope, localStorageService, $rootScope) {
-    var board = new Board(3, 3);
-    board.initialize(1);
-    $scope.board = board;
-
-    function updateScores() {
-      board.scores = localStorageService.get("scores") || {};
+angular.module('mineSweeper').factory(
+  "scores",
+  [
+    "localStorageService",
+    function(localStorageService) {
+      var scores = localStorageService.get('scores') || {};
+      return {
+        get: function() {
+          return scores;
+        },
+        save: function() {
+          return localStorageService.set('scores', scores);
+        },
+        increment: function(key) {
+          if (scores[key] === undefined)
+            scores[key] = 0;
+          scores[key] += 1;
+          this.save();
+        }
+      };
     }
-    updateScores();
-    $scope.$on("scoresUpdated", updateScores);
+  ]
+);
 
-    $scope.revealCell = function(cell) {
-      if (board.gameLost || board.gameWon) {
+angular.module('mineSweeper').controller("GameController", [
+  "scores",
+  function(scores) {
+    this.nbMines = 1;
+    this.updateBoard = () => {
+      this.board = new Board(
+        this.i_rows || 5,
+        this.i_cols || 5
+      );
+      this.board.initialize(this.nbMines || 1);
+    };
+
+    this.updateBoard();
+
+    /*this.revealCell = (cell) => {
+      if (this.board.gameLost || this.board.gameWon) {
         return;
       }
       if (cell.hasMine) {
-        board.gameLost = true;
+        this.board.gameLost = true;
         return;
       }
       if(!cell.revealed) {
         cell.revealed = true;
-        board.roundsLeft = board.roundsLeft - 1;
+        this.board.roundsLeft = this.board.roundsLeft - 1;
       }
-      if (board.roundsLeft === 0) {
-        board.gameWon = true;
-        board.score += 1;
-        let key = board.nbMines;
-        if (board.scores[key] === undefined)
-          board.scores[key] = 0;
-        board.scores[key] += 1;
+      if (this.board.roundsLeft === 0) {
+        this.board.gameWon = true;
+        this.board.score += 1;
+        let key = this.board.nbMines;
 
-        localStorageService.set("scores", board.scores);
-        $rootScope.$broadcast("scoresUpdated");
+        scores.increment(key);
       }
-    };
+    };*/
 
-    $scope.newGame = function() {
-      board.initialize($scope.nbMines);
+    this.newGame = () => {
+      this.board.initialize(this.nbMines);
     };
 
   }
 ]);
 
-app.directive(
+angular.module('mineSweeper').directive(
   "minesweeper",
   function() {
     return {
       restrict: 'E',
       templateUrl: "/templates/minesweeper.html",
       controller: "GameController",
-      scope: {}
+      scope: {
+        rows: "=",
+        cols: "="
+      },
+      bindToController: true,
+      controllerAs: "vm"
     };
   }
 );
 
-app.directive(
+angular.module('mineSweeper').directive(
   "minesweeperScores",
   function() {
     return {
       restrict: 'E',
       templateUrl: "/templates/minesweeperScores.html",
       scope: {},
+      bindToController: true,
+      controllerAs: 'vm',
       controller: [
-        "$scope",
-        "localStorageService",
-        function($scope, localStorageService) {
-          function updateScores() {
-            $scope.scores = localStorageService.get("scores") || {};
-          }
-          updateScores();
-          $scope.$on("scoresUpdated", updateScores);
+        "scores",
+        function(scores) {
+          this.scores = scores.get();
+        }
+      ]
+    };
+  }
+);
+
+angular.module('mineSweeper').directive(
+  'cell',
+  function() {
+    return {
+      restrict: 'E',
+      bindToController: true,
+      controllerAs: 'vm',
+      require: '^minesweeper',
+      templateUrl: '/src/templates/cell.html',
+      scope: {
+        object: "="
+      },
+      link: function(scope, element, attributes, minesweeperCtrl) {
+        scope.vm.minesweeperCtrl = minesweeperCtrl;
+      },
+      controller: [
+        function() {
+          this.revealed = this.object.revealed;
+          this.hasMine = this.object.hasMine;
+          this.minesAround = this.object.minesAround;
+
+          this.revealCell = () => {
+            console.log('reveal cell');
+            if (this.minesweeperCtrl.gameLost || this.minesweeperCtrl.gameWon) {
+              return;
+            }
+            if (this.hasMine) {
+              this.minesweeperCtrl.gameLost = true;
+              return;
+            }
+            if(!this.revealed) {
+              this.revealed = true;
+              this.minesweeperCtrl.roundsLeft = this.minesweeperCtrl.roundsLeft - 1;
+            }
+            // if (this.board.roundsLeft === 0) {
+            //   this.minesweeperCtrl.gameWon = true;
+            //   this.minesweeperCtrl.score += 1;
+            //   let key = this.minesweeperCtrl.nbMines;
+            //
+            //   scores.increment(key);
+            // }
+          };
         }
       ]
     };

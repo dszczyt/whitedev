@@ -1,23 +1,40 @@
-<form ng-submit="newGame()">
+<form ng-init="i_rows=5 ; i_cols=5">
+  <div>
+    <label>Rows :
+      <input
+      type="number"
+      ng-model="vm.i_rows"
+      ng-change="vm.updateBoard()"
+      />
+    </label>
+  </div>
+  <div>
+    <label>Cols :
+      <input
+      type="number"
+      ng-model="vm.i_cols"
+      ng-change="vm.updateBoard()"
+      />
+    </label>
+  </div>
+</form>
+<div>Rows : {{ i_rows }}</div>
+<div>Cols : {{ i_cols }}</div>
+
+<form ng-submit="vm.newGame()">
   <label for="nbMines">Nombre de mines</label>
-  <input id="nbMines" type="number" ng-model="nbMines"/>
+  <input id="nbMines" type="number" ng-model="vm.nbMines"/>
   <button type="submit">Nouveau jeu</button>
 </form>
 <table>
   <tbody>
-    <tr ng-repeat="row in board.cells track by $index">
-      <td
-        ng-repeat="cell in row track by $index"
-        ng-click="revealCell(cell)"
-        ng-class="{revealed: cell.revealed}">
-        <span ng-if="cell.revealed && cell.hasMine">*</span>
-        <span ng-if="cell.revealed && !cell.hasMine && cell.minesAround > 0">
-          {{ cell.minesAround }}
-        </span>
+    <tr ng-repeat="row in vm.board.cells track by $index">
+      <td ng-repeat="cell in row track by $index">
+        <cell object="cell"></cell>
       </td>
     </tr>
   </tbody>
 </table>
-<div ng-if="board.gameLost">Vous avez perdu</div>
-<div ng-if="board.gameWon">Vous avez gagné</div>
-<div>Votre score : {{ board.score }}</div>
+<div ng-if="vm.board.gameLost">Vous avez perdu</div>
+<div ng-if="vm.board.gameWon">Vous avez gagné</div>
+<div>Votre score : {{ vm.board.score }}</div>

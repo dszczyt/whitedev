@@ -4,7 +4,7 @@
     <th>Score</th>
   </thead>
   <tbody>
-    <tr ng-repeat="(nbMines, score) in scores track by $index">
+    <tr ng-repeat="(nbMines, score) in vm.scores track by $index">
       <td>{{ nbMines }}</td>
       <td>{{ score }}</td>
     </tr>
